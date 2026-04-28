@@ -90,10 +90,12 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
         working-directory: e2e
-      - name: Build Docker stack
-        run: docker compose build
+      - name: Seed .env from .env.example
+        run: cp .env.example .env
+      - name: Build Docker stack (production-mode only — skip dev override)
+        run: docker compose -f docker-compose.yml build
       - name: Start stack
-        run: docker compose up -d --wait
+        run: docker compose -f docker-compose.yml up -d --wait
       - name: Run E2E
         run: npm test --workspace @bmad-todo/e2e
       - name: Upload Playwright report on failure
@@ -103,6 +105,9 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report
           retention-days: 7
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml logs --no-color
       - name: Tear down stack
         if: always()
-        run: docker compose down -v
+        run: docker compose -f docker-compose.yml down -v
