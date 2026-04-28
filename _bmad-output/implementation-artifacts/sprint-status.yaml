@@ -1,0 +1,73 @@
+# generated: 2026-04-28
+# last_updated: 2026-04-28
+# project: bmad-todo
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: {project-root}/_bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-04-28
+last_updated: 2026-04-28
+project: bmad-todo
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  epic-1: done
+  1-1-scaffold-the-workspace-monorepo-and-shared-tooling: done
+  1-2-set-up-github-actions-ci-baseline: done
+  1-3-provision-docker-compose-topology-with-persistent-postgres: done
+  1-4-build-backend-fastify-skeleton-with-config-plugins-and-basic-health-endpoint: done
+  1-5-frontend-skeleton-with-placeholder-ui-vite-config-and-playwright-baseline: done
+  1-6-shared-package-with-todo-error-and-health-zod-schemas: done
+  1-7-todo-persistence-layer-todos-table-repository: done
+  1-8-end-to-end-add-and-view-first-todo-with-empty-state: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-toggle-todo-completion-mark-complete-and-un-complete: done
+  2-2-delete-a-todo: done
+  2-3-visual-distinction-between-active-and-completed-todos: done
+  epic-2-retrospective: optional
+
+  epic-3: done
+  3-1-loading-state-ui-on-initial-fetch: done
+  3-2-error-state-ui-with-retry-on-load-and-mutation-failures: done
+  3-3-verify-durability-across-refresh-and-container-restart: done
+  3-4-persistence-aware-health-endpoint-with-state-transition-logging: done
+  epic-3-retrospective: optional
+
+  epic-4: done
+  4-1-responsive-layout-for-desktop-1024-px-and-mobile-360-px: done
+  4-2-keyboard-accessibility-and-wcag-2-2-level-a-automated-verification: done
+  4-3-final-nfr20-acceptance-run-and-readme-finalization: done
+  epic-4-retrospective: optional

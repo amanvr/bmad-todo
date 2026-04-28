@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+package-lock.json
+*.min.js
+*.min.css
+drizzle
+
+_bmad-output
+_bmad
+.claude
+.agents
+CLAUDE.md
