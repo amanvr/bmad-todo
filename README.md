@@ -2,7 +2,7 @@
 
 A local-first single-user todo app with a Fastify API, React frontend, shared Zod contracts, and PostgreSQL persistence, all runnable via Docker Compose.
 
-<!-- TODO: add CI badge once on GitHub -->
+[![CI](https://github.com/amanvr/bmad-todo/actions/workflows/ci.yml/badge.svg)](https://github.com/amanvr/bmad-todo/actions/workflows/ci.yml)
 
 ## What it is
 
@@ -17,6 +17,8 @@ cp .env.example .env
 docker compose -f docker-compose.yml up --wait
 xdg-open http://localhost:8080
 ```
+
+For development with hot-reload, run `docker compose up` (no `-f`) — `docker-compose.override.yml` swaps the frontend to Vite on `http://localhost:5173` and the backend to `tsx --watch`.
 
 ## Prerequisites
 
@@ -91,7 +93,9 @@ Target elapsed time is **<= 15 minutes**. If exceeded, record the bottleneck ste
 
 ## Tests
 
-- `npm run test` runs backend/frontend/shared unit and component tests plus E2E.
+- `npm run test` runs unit and component tests for `@bmad-todo/backend` and `@bmad-todo/frontend`. The `e2e` workspace is excluded — Playwright runs separately because it needs browsers installed and the Docker stack up.
+- Backend integration tests against a real Postgres are opt-in. With the stack running, run `RUN_POSTGRES_TESTS=true npm run test:integration --workspace @bmad-todo/backend` (uses `TEST_DATABASE_URL` → `DATABASE_URL`).
+- E2E: `docker compose -f docker-compose.yml up -d --wait` then `npm test --workspace @bmad-todo/e2e` (first run: `npm run test:install --workspace @bmad-todo/e2e`).
 - NFR20 flow coverage includes create/list/complete/incomplete/delete Playwright specs.
 - Accessibility is enforced by `e2e/tests/accessibility.spec.ts` (WCAG 2.2 Level A, zero violations).
 - Coverage target is `>= 70%` on backend and frontend.
@@ -101,7 +105,7 @@ Target elapsed time is **<= 15 minutes**. If exceeded, record the bottleneck ste
 - Port `8080` busy: stop conflicting stacks or adjust frontend port mapping in local compose override.
 - `docker compose ... up` exits early: inspect logs via `docker compose logs <service>`.
 - Todo mutations fail: check backend logs and `/api/health`.
-- Integration tests fail on DB setup: create `bmad_todo_test` in Postgres and rerun.
+- Integration tests fail or get skipped: they require `RUN_POSTGRES_TESTS=true` and a reachable Postgres at `TEST_DATABASE_URL` (defaults to `DATABASE_URL`); start the stack first with `docker compose -f docker-compose.yml up -d --wait`.
 - Windows mount issues: use Docker Desktop with WSL2 backend and keep repo in the WSL filesystem.
 
 ## Per-package docs
