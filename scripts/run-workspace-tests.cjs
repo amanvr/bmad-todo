@@ -28,6 +28,17 @@ if (workspaces.length === 0) {
   process.exit(0);
 }
 
+// Ensure cross-package dependencies (notably @bmad-todo/shared) have their
+// dist/ artifacts present before consumers try to resolve them. Local dev keeps
+// these around between runs, but CI starts clean.
+if (existsSync('packages/shared/package.json')) {
+  try {
+    execSync('npm run build --workspace @bmad-todo/shared', { stdio: 'inherit' });
+  } catch {
+    process.exit(1);
+  }
+}
+
 const args = workspaces.flatMap((name) => ['--workspace', name]);
 try {
   execSync(`npm test --if-present ${args.join(' ')}`, { stdio: 'inherit' });
