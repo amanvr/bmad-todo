@@ -1,0 +1,39 @@
+{
+  "name": "@bmad-todo/backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --watch src/server.ts",
+    "build": "tsc --build",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "RUN_POSTGRES_TESTS=true vitest run --no-file-parallelism tests/integration",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@bmad-todo/shared": "*",
+    "@fastify/cors": "11.2.0",
+    "@fastify/helmet": "13.0.2",
+    "@fastify/type-provider-zod": "1.0.0",
+    "drizzle-orm": "0.45.2",
+    "fastify": "5.8.5",
+    "fastify-plugin": "5.1.0",
+    "pg": "8.20.0",
+    "pino": "10.3.1",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.2",
+    "@types/pg": "8.20.0",
+    "@vitest/coverage-v8": "4.1.5",
+    "drizzle-kit": "0.31.10",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.5"
+  }
+}

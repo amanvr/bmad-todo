@@ -1,63 +1,120 @@
 # bmad-todo
 
-A deliberately minimal full-stack todo web application, built as a learning exercise for the BMad planning-and-execution workflow.
+A local-first single-user todo app with a Fastify API, React frontend, shared Zod contracts, and PostgreSQL persistence, all runnable via Docker Compose.
 
-## Status
+<!-- TODO: add CI badge once on GitHub -->
 
-**Planning complete. Implementation pending.**
+## What it is
 
-The brief, PRD, architecture, and epic / story breakdown are signed off and validated. The application code has not been written yet — execution starts at Story 1.1 of `epics.md`.
+`bmad-todo` is a production-shaped v1 reference app for a single-screen todo workflow. It demonstrates strict TypeScript workspace architecture, backend layering (controller/service/repository), and end-to-end quality gates (Vitest + Playwright + axe).
 
-This README will be rewritten by Story 4.3 into the dev-team-facing version (Quick Start, Prerequisites, `docker compose up` flow, troubleshooting) that satisfies NFR16's "first-run within 15 minutes on a Docker-installed machine" target. Until then, what follows is enough to navigate the planning artifacts and start dev.
+## Quick Start
 
-## What this repo currently contains
-
-```
-.
-├── CLAUDE.md                                 # guidance for Claude Code sessions
-├── _bmad-output/planning-artifacts/          # the planning chain (source of truth)
-│   ├── product-brief.md                      # signed off
-│   ├── prd.md                                # validated (5/5, zero critical issues)
-│   ├── prd-validation-report.md
-│   ├── architecture.md                       # ready for implementation
-│   └── epics.md                              # 4 epics, 18 stories
-├── _bmad/                                    # BMad-method install (v6.5.0)
-└── .claude/skills/                           # BMad skill scaffolds
+```bash
+# Prerequisites: Docker Engine 24+, Git, ~2GB free disk space.
+git clone <repo-url> bmad-todo && cd bmad-todo
+cp .env.example .env
+docker compose -f docker-compose.yml up --wait
+xdg-open http://localhost:8080
 ```
 
-There is no `package.json`, no source tree, and no build / test / lint commands yet. Everything below the line *"What the running app will be"* is design intent; running code arrives with Story 1.1.
+## Prerequisites
 
-## What the running app will be
+- Docker Engine 24+ (`docker --version`)
+- Git
+- Node.js LTS (for local non-container workflows; see `.nvmrc`)
 
-A single-page React frontend talking to a Fastify HTTP backend backed by PostgreSQL, all containerized and orchestrated locally via `docker compose`. Single user, no authentication, deliberately minimal UX bar ("doesn't look broken"). The full v1 contract:
+## Environment variables
 
-- 23 binding functional requirements (`FR1`–`FR23`) covering CRUD on todos, application-lifecycle states, persistence guarantees, operational health, responsive layout, accessibility, and configuration / deployment shape.
-- 23 non-functional requirements covering performance (qualitative), baseline security, accessibility (WCAG 2.2 Level A), durability, maintainability, testability (≥ 70% coverage on backend and frontend; ≥ 5 Playwright E2E flows), and cross-OS portability (Linux / macOS / Windows hosts via Docker).
-- Architectural seams left in place — but **not implemented** — for four future capabilities: multi-user / authentication, per-todo metadata (priority / due date / tags), real-time sync, audit log.
+Copy `.env.example` to `.env` and adjust as needed:
 
-Full details: `_bmad-output/planning-artifacts/prd.md` and `architecture.md`.
+| Var                 | Purpose                         | Example                                                             |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------- |
+| `POSTGRES_USER`     | Postgres username               | `bmad_todo`                                                         |
+| `POSTGRES_PASSWORD` | Postgres password               | `changeme_in_real_env`                                              |
+| `POSTGRES_DB`       | Postgres database name          | `bmad_todo`                                                         |
+| `DATABASE_URL`      | Backend Postgres connection URL | `postgres://bmad_todo:changeme_in_real_env@postgres:5432/bmad_todo` |
+| `BACKEND_PORT`      | Backend internal port           | `3000`                                                              |
+| `CORS_ORIGINS`      | Allowed browser origins         | `http://localhost:8080`                                             |
+| `NODE_ENV`          | Runtime mode                    | `development`                                                       |
+| `LOG_LEVEL`         | Backend logger level            | `info`                                                              |
 
-## How implementation works
+## Common commands
 
-Story-driven, sequential, one story at a time:
+```bash
+# Stack
+docker compose -f docker-compose.yml up --wait
+docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml down -v
 
-1. Stories live in `_bmad-output/planning-artifacts/epics.md`, sequenced 1.1 → 1.2 → … → 4.3 across four epics.
-2. Each story has Given / When / Then acceptance criteria **plus** explicit Test Scenarios per layer (Unit / Integration / E2E).
-3. Story 1.1 is the workspace scaffold — npm workspaces, ESLint + Prettier, TypeScript strict, Vitest config, root `README.md` skeleton (which will replace this file with the dev-team-facing version), and the GitHub Actions baseline.
-4. Story 1.8 is the first end-to-end "add and view a todo" — at the end of Story 1.8 the app is real and persistent.
-5. Story 4.3 is the v1 acceptance gate.
+# Workspace
+npm ci
+npm run lint
+npm run format
+npm run format:check
+npm run typecheck
+npm run test
 
-## Getting started (today)
+# Per-package
+npm test --workspace @bmad-todo/backend
+npm test --workspace @bmad-todo/frontend
+npm test --workspace @bmad-todo/e2e
+```
 
-If you want to start implementation:
+## Project structure
 
-1. Read `CLAUDE.md` for the implementation conventions and constraints.
-2. Read the planning artifacts in order: `product-brief.md` → `prd.md` → `architecture.md` → `epics.md`.
-3. (Recommended) Run `/bmad-check-implementation-readiness` for a final cross-artifact alignment check.
-4. Invoke `/bmad-dev-story 1.1` (or `/bmad-agent-dev` and pick the implement-story menu item) to start Story 1.1.
+Core workspaces:
 
-If you want to refine the planning chain instead, every BMad skill is invokable from this repo — see `CLAUDE.md` for the entry points.
+- `apps/backend` — Fastify API, Drizzle ORM, PostgreSQL integration
+- `apps/frontend` — React + Vite client, CSS modules
+- `packages/shared` — shared Zod schemas/types for API contracts
+- `e2e` — Playwright suite (flows, responsive, keyboard, accessibility)
 
-## A note on tooling
+See `_bmad-output/planning-artifacts/architecture.md` for the full boundary and layering model.
 
-BMad is currently installed for Claude Code only. The IDE list is in `_bmad/_config/manifest.yaml` (`ides:` array). To add Cursor or another IDE adapter, re-run the BMad installer; the planning artifacts themselves are plain markdown and portable to any tool.
+## Architectural overview
+
+The backend enforces one-way layering (`controllers -> services -> repositories -> db`) with typed errors and centralized error mapping. The frontend uses feature folders (`features/todos`) with `useReducer` and pessimistic updates. Shared contracts live in `packages/shared` and are consumed by both apps.
+
+## Fresh-machine first-run verification (NFR16 acceptance)
+
+Run this on a machine that has never built this repo before and time each step:
+
+1. Install Docker Engine (if missing).
+2. `git clone <repo-url> bmad-todo && cd bmad-todo`
+3. `cp .env.example .env`
+4. `docker compose -f docker-compose.yml up --wait`
+5. Open `http://localhost:8080` and verify the app loads.
+6. Create one todo and verify it appears in the list.
+
+Target elapsed time is **<= 15 minutes**. If exceeded, record the bottleneck step and open a project issue.
+
+## Tests
+
+- `npm run test` runs backend/frontend/shared unit and component tests plus E2E.
+- NFR20 flow coverage includes create/list/complete/incomplete/delete Playwright specs.
+- Accessibility is enforced by `e2e/tests/accessibility.spec.ts` (WCAG 2.2 Level A, zero violations).
+- Coverage target is `>= 70%` on backend and frontend.
+
+## Troubleshooting
+
+- Port `8080` busy: stop conflicting stacks or adjust frontend port mapping in local compose override.
+- `docker compose ... up` exits early: inspect logs via `docker compose logs <service>`.
+- Todo mutations fail: check backend logs and `/api/health`.
+- Integration tests fail on DB setup: create `bmad_todo_test` in Postgres and rerun.
+- Windows mount issues: use Docker Desktop with WSL2 backend and keep repo in the WSL filesystem.
+
+## Per-package docs
+
+- `apps/backend/README.md`
+- `apps/frontend/README.md`
+- `packages/shared/README.md`
+- `e2e/README.md`
+
+## License
+
+<!-- TODO: add license -->
+
+## Issues
+
+Use your repository issue tracker for bugs, docs gaps, or first-run bottleneck reports.
